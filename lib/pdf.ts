@@ -23,26 +23,63 @@ if (typeof Promise.withResolvers === "undefined") {
     }
 }
 
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-// Required for Node.js
-// pdfjsLib.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
+// export async function extractTextFromPDF(buffer: ArrayBuffer) {
+//     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
+//     // Required for Node.js
+//     // pdfjsLib.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
+
+//     const loadingTask = pdfjsLib.getDocument({
+//         data: buffer,
+//         // Use system fonts to avoid resolving issues
+//         standardFontDataUrl: "node_modules/pdfjs-dist/standard_fonts/",
+//     });
+
+//     const pdf = await loadingTask.promise;
+//     let text = "";
+
+//     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+//         const page = await pdf.getPage(pageNum);
+//         const content = await page.getTextContent();
+
+//         const strings = content.items.map((item: any) => item.str);
+//         text += strings.join(" ") + " ";
+//     }
+
+//     return text.trim();
+// }
+
+// Switching to a more robust implementation that handles imports safely
 export async function extractTextFromPDF(buffer: ArrayBuffer) {
-    const loadingTask = pdfjsLib.getDocument({
-        data: buffer,
-    });
+    try {
+        const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
-    const pdf = await loadingTask.promise;
-    let text = "";
+        // No worker needed for basic text extraction in legacy mode usually
+        // But if needed, we can point to a CDN or local file, but serverless paths are tricky.
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const content = await page.getTextContent();
+        const loadingTask = pdfjsLib.getDocument({
+            data: new Uint8Array(buffer), // Ensure Uint8Array
+            useSystemFonts: true,
+        });
 
-        const strings = content.items.map((item: any) => item.str);
-        text += strings.join(" ") + " ";
+        const pdf = await loadingTask.promise;
+        let text = "";
+        let count = 0;
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const content = await page.getTextContent();
+
+            // @ts-ignore
+            const strings = content.items.map((item: any) => item.str);
+            text += strings.join(" ") + " ";
+            count++;
+        }
+
+        return text.trim();
+    } catch (error: any) {
+        console.error("Error parsing PDF:", error);
+        throw new Error("Failed to parse PDF: " + error.message);
     }
-
-    return text.trim();
 }
