@@ -23,6 +23,15 @@ if (typeof Promise.withResolvers === "undefined") {
     }
 }
 
+// Polyfill for DOMMatrix (required by pdfjs-dist)
+if (typeof DOMMatrix === "undefined") {
+    // @ts-expect-error Polyfill for Node.js
+    global.DOMMatrix = class DOMMatrix {
+        a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+        constructor() { }
+    };
+}
+
 
 // export async function extractTextFromPDF(buffer: ArrayBuffer) {
 //     const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
