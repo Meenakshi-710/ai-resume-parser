@@ -73,15 +73,21 @@ export default function Home() {
         body: formData,
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
+        const errorText = await res.text();
+        throw new Error(errorText || res.statusText);
       }
 
+      const data = await res.json();
       setResult(data.data);
     } catch (err: any) {
-      setError(err.message);
+      // Try to parse error if it's a JSON string in the error message
+      try {
+        const parsedError = JSON.parse(err.message);
+        setError(parsedError.error || err.message);
+      } catch {
+        setError(err.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
