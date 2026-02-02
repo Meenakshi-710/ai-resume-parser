@@ -3,13 +3,6 @@ import { extractTextFromPDF } from "@/lib/pdf";
 import { parseResumeWithAI } from "@/lib/ai";
 import { ResumeSchema } from "@/lib/schema";
 
-export const maxDuration = 60; // 60 seconds
-export const dynamic = 'force-dynamic';
-
-export async function GET() {
-    return NextResponse.json({ status: "ok", message: "API is working" });
-}
-
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
