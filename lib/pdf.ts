@@ -26,7 +26,7 @@ if (typeof Promise.withResolvers === "undefined") {
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 // Required for Node.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
+// pdfjsLib.GlobalWorkerOptions.workerSrc = "pdfjs-dist/legacy/build/pdf.worker.mjs";
 
 export async function extractTextFromPDF(buffer: ArrayBuffer) {
     const loadingTask = pdfjsLib.getDocument({
